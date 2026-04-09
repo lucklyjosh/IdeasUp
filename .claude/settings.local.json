@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" npx prisma generate)",
+      "Bash(npx prisma:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls -la /c/Users/47618/OneDrive/Desktop/IdeasUp/app/ideas/[id]/)",
+      "Bash(ls -la /c/Users/47618/OneDrive/Desktop/IdeasUp/app/needs/[id]/)",
+      "Bash(npx next:*)",
+      "Bash(find C:Users47618OneDriveDesktopIdeasUphooks -type f -name *.ts)",
+      "Bash(npx vitest:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsx:*)",
+      "Bash(cd:*)"
+    ]
+  }
+}
