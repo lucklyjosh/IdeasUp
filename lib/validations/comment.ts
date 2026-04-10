@@ -7,3 +7,9 @@ export const createCommentSchema = z.object({
 })
 
 export type CreateCommentInput = z.infer<typeof createCommentSchema>
+
+export const updateCommentSchema = z.object({
+  body: z.string().min(1).max(1000),
+})
+
+export type UpdateCommentInput = z.infer<typeof updateCommentSchema>

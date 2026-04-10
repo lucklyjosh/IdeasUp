@@ -13,9 +13,16 @@ import { StageSelector } from "./StageSelector"
 import { MediaUpload } from "./MediaUpload"
 import { INDUSTRIES, IDEA_CATEGORIES } from "@/lib/utils/constants"
 
-export function PostForm() {
+type PostFormProps = {
+  mode?: "create" | "edit"
+  postId?: string
+  initialValues?: Partial<CreatePostInput> & { type: CreatePostInput["type"] }
+  initialMediaUrls?: string[]
+}
+
+export function PostForm({ mode = "create", postId, initialValues, initialMediaUrls = [] }: PostFormProps) {
   const router = useRouter()
-  const [mediaUrls, setMediaUrls] = useState<string[]>([])
+  const [mediaUrls, setMediaUrls] = useState<string[]>(initialMediaUrls)
   const [serverError, setServerError] = useState<string | null>(null)
 
   const {
@@ -34,6 +41,7 @@ export function PostForm() {
       links: [],
       categories: [],
       willingToPay: false,
+      ...initialValues,
     },
   })
 
@@ -43,8 +51,9 @@ export function PostForm() {
   async function onSubmit(data: CreatePostInput) {
     setServerError(null)
 
-    const res = await fetch("/api/posts", {
-      method: "POST",
+    const isEdit = mode === "edit" && postId
+    const res = await fetch(isEdit ? `/api/posts/${postId}` : "/api/posts", {
+      method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
@@ -58,6 +67,7 @@ export function PostForm() {
     const { data: post } = await res.json()
     const path = post.type === "IDEA" ? `/ideas/${post.id}` : `/needs/${post.id}`
     router.push(path)
+    router.refresh()
   }
 
   function handleTechStackChange(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -98,10 +108,12 @@ export function PostForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <TypeSelector
-        value={postType}
-        onChange={(v) => setValue("type", v)}
-      />
+      {mode === "create" && (
+        <TypeSelector
+          value={postType}
+          onChange={(v) => setValue("type", v)}
+        />
+      )}
 
       <Input
         id="title"
@@ -221,7 +233,11 @@ export function PostForm() {
       )}
 
       <Button type="submit" isLoading={isSubmitting} className="w-full">
-        {postType === "IDEA" ? "Share your idea" : "Post your need"}
+        {mode === "edit"
+          ? "Save changes"
+          : postType === "IDEA"
+            ? "Share your idea"
+            : "Post your need"}
       </Button>
     </form>
   )

@@ -9,4 +9,5 @@ export type Comment = {
   user: User
   replies?: Comment[]
   createdAt: Date
+  updatedAt: Date
 }

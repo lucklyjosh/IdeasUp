@@ -28,6 +28,7 @@ const makeComment = (overrides: Partial<Comment> = {}): Comment => ({
   user: mockUser,
   replies: [],
   createdAt: new Date(),
+  updatedAt: new Date(),
   ...overrides,
 })
 

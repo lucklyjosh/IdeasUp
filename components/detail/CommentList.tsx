@@ -13,7 +13,7 @@ type CommentListProps = {
 }
 
 export function CommentList({ postId, currentUserId, initialComments }: CommentListProps) {
-  const { comments, commentCount, addComment, addReply } = useComments({
+  const { comments, commentCount, addComment, addReply, updateComment, deleteComment } = useComments({
     postId,
     initialComments,
   })
@@ -35,6 +35,14 @@ export function CommentList({ postId, currentUserId, initialComments }: CommentL
     await addReply(body, parentId)
   }
 
+  async function handleUpdate(id: string, body: string) {
+    return await updateComment(id, body)
+  }
+
+  async function handleDelete(id: string) {
+    return await deleteComment(id)
+  }
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-zinc-900">
@@ -50,6 +58,8 @@ export function CommentList({ postId, currentUserId, initialComments }: CommentL
             comment={comment}
             currentUserId={currentUserId}
             onReply={handleReply}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
           />
         ))}
       </div>

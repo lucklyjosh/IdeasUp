@@ -3,9 +3,16 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/Badge"
 import { Avatar } from "@/components/ui/Avatar"
 import { VoteControl } from "@/components/ui/VoteControl"
-import { formatDate } from "@/lib/utils/format"
+import { formatDate, formatRelativeTime } from "@/lib/utils/format"
+import { PostActions } from "./PostActions"
 import type { Post } from "@/types/post"
 import type { User } from "@/types/user"
+
+function isEdited(post: Post): boolean {
+  const created = new Date(post.createdAt).getTime()
+  const updated = new Date(post.updatedAt).getTime()
+  return updated - created > 1000
+}
 
 type PostHeaderProps = {
   post: Post & { author: User }
@@ -26,6 +33,8 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export function PostHeader({ post, currentUserId, currentUserVote }: PostHeaderProps) {
+  const isAuthor = currentUserId === post.authorId
+
   return (
     <div className="rounded-2xl bg-white p-6 subtle-ring">
       <div className="flex gap-4">
@@ -37,22 +46,25 @@ export function PostHeader({ post, currentUserId, currentUserVote }: PostHeaderP
         />
 
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5 mb-3">
-            <Badge variant={post.type === "IDEA" ? "idea" : "need"}>
-              {post.type === "IDEA" ? "Idea" : "Need"}
-            </Badge>
-            {post.type === "IDEA" && post.stage && (
-              <Badge variant="stage">{STAGE_LABEL[post.stage]}</Badge>
-            )}
-            {post.type === "NEED" && post.industry && (
-              <Badge variant="muted">{post.industry}</Badge>
-            )}
-            {post.type === "NEED" && (
-              <Badge variant="stage">{STATUS_LABEL[post.status]}</Badge>
-            )}
-            {post.categories.map((cat) => (
-              <Badge key={cat} variant="muted">{cat}</Badge>
-            ))}
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant={post.type === "IDEA" ? "idea" : "need"}>
+                {post.type === "IDEA" ? "Idea" : "Need"}
+              </Badge>
+              {post.type === "IDEA" && post.stage && (
+                <Badge variant="stage">{STAGE_LABEL[post.stage]}</Badge>
+              )}
+              {post.type === "NEED" && post.industry && (
+                <Badge variant="muted">{post.industry}</Badge>
+              )}
+              {post.type === "NEED" && (
+                <Badge variant="stage">{STATUS_LABEL[post.status]}</Badge>
+              )}
+              {post.categories.map((cat) => (
+                <Badge key={cat} variant="muted">{cat}</Badge>
+              ))}
+            </div>
+            {isAuthor && <PostActions postId={post.id} postType={post.type} />}
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{post.title}</h1>
@@ -66,6 +78,14 @@ export function PostHeader({ post, currentUserId, currentUserVote }: PostHeaderP
               <span className="font-medium">{post.author.username}</span>
             </Link>
             <span>{formatDate(post.createdAt)}</span>
+            {isEdited(post) && (
+              <span
+                className="italic text-xs text-zinc-400"
+                title={`Edited ${formatRelativeTime(post.updatedAt)}`}
+              >
+                (edited {formatRelativeTime(post.updatedAt)})
+              </span>
+            )}
             {post.type === "NEED" && post.willingToPay && (
               <span className="font-medium text-emerald-500">Willing to pay</span>
             )}

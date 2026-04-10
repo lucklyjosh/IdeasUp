@@ -82,6 +82,67 @@ export function useComments({ postId, initialComments = [] }: UseCommentsOptions
     [postId]
   )
 
+  const updateComment = useCallback(
+    async (id: string, body: string) => {
+      setError(null)
+
+      const res = await fetch(`/api/comments/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      })
+
+      if (!res.ok) {
+        const { error } = await res.json()
+        setError(error ?? "Failed to update comment")
+        return null
+      }
+
+      const { data } = await res.json()
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === id) {
+            return { ...c, body: data.body, updatedAt: data.updatedAt }
+          }
+          if (c.replies?.some((r) => r.id === id)) {
+            return {
+              ...c,
+              replies: c.replies.map((r) =>
+                r.id === id ? { ...r, body: data.body, updatedAt: data.updatedAt } : r
+              ),
+            }
+          }
+          return c
+        })
+      )
+      return data as Comment
+    },
+    []
+  )
+
+  const deleteComment = useCallback(async (id: string) => {
+    setError(null)
+
+    const res = await fetch(`/api/comments/${id}`, { method: "DELETE" })
+
+    if (!res.ok) {
+      const { error } = await res.json()
+      setError(error ?? "Failed to delete comment")
+      return false
+    }
+
+    setComments((prev) =>
+      prev
+        .filter((c) => c.id !== id)
+        .map((c) =>
+          c.replies?.some((r) => r.id === id)
+            ? { ...c, replies: c.replies.filter((r) => r.id !== id) }
+            : c
+        )
+    )
+    return true
+  }, [])
+
   const commentCount = comments.reduce(
     (total, c) => total + 1 + (c.replies?.length ?? 0),
     0
@@ -95,5 +156,7 @@ export function useComments({ postId, initialComments = [] }: UseCommentsOptions
     fetchComments,
     addComment,
     addReply,
+    updateComment,
+    deleteComment,
   }
 }
