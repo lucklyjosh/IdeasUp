@@ -12,7 +12,8 @@
       "Bash(npx vitest:*)",
       "Bash(mkdir:*)",
       "Bash(npx tsx:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

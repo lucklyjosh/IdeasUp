@@ -29,7 +29,7 @@ export default async function ProfilePage({ params }: PageProps) {
     orderBy: { createdAt: "desc" },
   })
 
-  const totalScore = posts.reduce((sum: number, p) => sum + p.score, 0)
+  const totalScore = posts.reduce<number>((sum, p) => sum + p.score, 0)
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
